@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar" id="main-html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOODOO FULL MENU - MULTILINGUAL</title>
+    <style>
+        :root { --gold: #ff9900; --dark: #000; }
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; transition: 0.3s; }
+        .hero { background: url('https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600') center/cover; height: 150px; display: flex; align-items: center; justify-content: center; border-bottom: 3px solid var(--gold); position: relative; }
+        .hero h1 { color: var(--gold); font-size: 32px; text-shadow: 2px 2px 10px #000; margin:0; }
+        
+        /* زرار تغيير اللغة */
+        .lang-btn { position: absolute; top: 10px; left: 10px; background: var(--gold); color: #000; border: none; padding: 8px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; z-index: 10; }
+
+        .container { padding: 10px; max-width: 600px; margin: auto; padding-bottom: 80px; }
+        .cat-box { background: #111; border-radius: 12px; margin-bottom: 25px; border: 1px solid #222; overflow: hidden; }
+        .cat-title { padding: 12px; color: var(--gold); background: #1a1a1a; text-align: center; font-size: 20px; border-bottom: 2px solid var(--gold); margin:0; }
+        
+        .item { display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid #222; }
+        .price-group { display: flex; gap: 5px; align-items: center; }
+        .price { background: #1a1a1a; padding: 5px 8px; border-radius: 6px; color: #00ff00; font-weight: bold; font-size: 13px; border: 1px solid #333; text-align: center; min-width: 50px; }
+        .p-lbl { font-size: 8px; color: #777; display: block; margin-bottom: 2px; }
+        .btn-ws { background: #25d366; color: #fff; text-decoration: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
+
+        /* شات بوت */
+        #chat-widget { position: fixed; bottom: 20px; left: 20px; z-index: 1000; }
+        #chat-btn { background: var(--gold); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 15px var(--gold); font-size: 30px; }
+        #chat-window { display: none; position: fixed; bottom: 90px; left: 20px; width: 280px; background: #1a1a1a; border: 1px solid var(--gold); border-radius: 15px; overflow: hidden; flex-direction: column; box-shadow: 0 5px 25px rgba(0,0,0,0.8); }
+        .chat-header { background: var(--gold); color: #000; padding: 10px; font-weight: bold; text-align: center; }
+        .chat-body { padding: 10px; max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .chat-msg { background: #333; padding: 8px; border-radius: 8px; font-size: 13px; line-height: 1.4; }
+        .chat-options { display: flex; flex-wrap: wrap; gap: 5px; padding: 10px; background: #111; }
+        .opt-btn { background: #222; border: 1px solid var(--gold); color: #fff; padding: 6px; border-radius: 5px; font-size: 11px; cursor: pointer; flex: 1 1 45%; }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <button class="lang-btn" onclick="toggleLanguage()">English</button>
+    <h1>VOODOO MENU</h1>
+</div>
+
+<div class="container" id="menu-content"></div>
+
+<div id="chat-widget">
+    <div id="chat-window">
+        <div class="chat-header" id="chat-header-text">مساعد فودو الذكي 🤖</div>
+        <div class="chat-body" id="chat-body">
+            <div class="chat-msg" id="chat-welcome-msg">أهلاً بيك! تحب أرشحلك إيه النهاردة من منيو فودو؟</div>
+        </div>
+        <div class="chat-options" id="chat-options-btns">
+            </div>
+    </div>
+    <div id="chat-btn" onclick="toggleChat()">💬</div>
+</div>
+
+<script>
+    const WHATSAPP_NUMBER = '201014164102'; 
+    let currentLang = 'ar';
+
+    const menuData = [
+        { 
+            cat_ar: "سندوتشات سوري شرقي", 
+            cat_en: "Syrian Oriental Sandwiches",
+            items: [
+                {n_ar: "سندوتش فلافل", n_en: "Falafel Sandwich", p1: 30, p2: 35},
+                {n_ar: "بطاطس مع فلافل", n_en: "Fries with Falafel", p1: 35, p2: 40},
+                {n_ar: "سندوتش بطاطس موزاريلا", n_en: "Fries Mozzarella", p1: 40, p2: 45},
+                {n_ar: "كفتة مع بطاطس", n_en: "Kofta with Fries", p1: 50, p2: 60},
+                {n_ar: "سندوتش شاورما دجاج", n_en: "Chicken Shawarma", p1: 75, p2: 80},
+            ]
+        },
+        { 
+            cat_ar: "سندوتشات سوري غربي", 
+            cat_en: "Syrian Western Sandwiches",
+            items: [
+                {n_ar: "سندوتش كرسبي", n_en: "Crispy Sandwich", p1: 75, p2: 75},
+                {n_ar: "سندوتش اسكالوب", n_en: "Escalope Sandwich", p1: 75, p2: 75},
+                {n_ar: "سندوتش كرانشي", n_en: "Crunchy Sandwich", p1: 75, p2: 80},
+                {n_ar: "سندوتش فاهيتا", n_en: "Fahita Sandwich", p1: 75, p2: 80},
+                {n_ar: "سندوتش مكسيكانو", n_en: "Mexicano Sandwich", p1: 80, p2: 90},
+                {n_ar: "سندوتش زنجر", n_en: "Zinger Sandwich", p1: 80, p2: 90},
+                {n_ar: "برجر لحمة", n_en: "Beef Burger", p1: 60},
+                {n_ar: "برجر بيض", n_en: "Egg Burger", p1: 70},
+                {n_ar: "حواوشي صغير", n_en: "Small Hawawshi", p1: 30}, 
+                {n_ar: "حواوشي كبير", n_en: "Large Hawawshi", p1: 50}
+            ]
+        },
+        { 
+            cat_ar: "قسم الكريبات", 
+            cat_en: "Crepes Section",
+            items: [
+                {n_ar: "كريب بطاطس", n_en: "Fries Crepe", p1: 50},
+                {n_ar: "كريب كرسبي", n_en: "Crispy Crepe", p1: 90},
+                {n_ar: "كريب شاورما دجاج", n_en: "Chicken Shawarma Crepe", p1: 90},
+                {n_ar: "كريب زنجر", n_en: "Zinger Crepe", p1: 100},
+                {n_ar: "كريب برجر", n_en: "Burger Crepe", p1: 80},
+            ]
+        },
+        { 
+            cat_ar: "قسم البروستد", 
+            cat_en: "Broasted Section",
+            items: [
+                {n_ar: "ربع ورك 2 قطعة", n_en: "Quarter Thigh (2 Pcs)", p1: 100},
+                {n_ar: "صدر بروستد 3 قطعة", n_en: "Broasted Breast (3 Pcs)", p1: 120},
+                {n_ar: "نصف فرخة 5 قطعة", n_en: "Half Chicken (5 Pcs)", p1: 200},
+                {n_ar: "فرخة كاملة 10 قطع", n_en: "Full Chicken (10 Pcs)", p1: 380}
+            ]
+        },
+        { 
+            cat_ar: "مقبلات وبالكيلو", 
+            cat_en: "Appetizers & By KG",
+            items: [
+                {n_ar: "ثومية", n_en: "Toumeya", p1: 10},
+                {n_ar: "مخلل", n_en: "Pickles", p1: 10},
+                {n_ar: "طبق بطاطس", n_en: "Fries Plate", p1: 25},
+                {n_ar: "كيلو ثومية", n_en: "KG Toumeya", p1: 100},
+                {n_ar: "كيلو مخلل", n_en: "KG Pickles", p1: 50},
+                {n_ar: "ربطة عيش لبناني", n_en: "Lebanese Bread Pack", p1: 20},
+                {n_ar: "ربطة عيش سوري", n_en: "Syrian Bread Pack", p1: 100}
+            ]
+        }
+    ];
+
+    const translations = {
+        ar: {
+            order: "طلب",
+            saj: "صاج",
+            price: "سعر",
+            french: "فرنساوي",
+            chatHeader: "مساعد فودو الذكي 🤖",
+            chatWelcome: "أهلاً بيك! تحب أرشحلك إيه النهاردة؟",
+            optLight: "خفيفة",
+            optHungry: "جعان",
+            optBudget: "توفير",
+            optClose: "إغلاق"
+        },
+        en: {
+            order: "Order",
+            saj: "Saj",
+            price: "Price",
+            french: "French",
+            chatHeader: "Voodoo Smart Bot 🤖",
+            chatWelcome: "Welcome! What can I recommend for you today?",
+            optLight: "Light Meal",
+            optHungry: "I'm Hungry",
+            optBudget: "Budget Friendly",
+            optClose: "Close"
+        }
+    };
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'ar' ? 'en' : 'ar';
+        document.getElementById('main-html').dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+        document.querySelector('.lang-btn').innerText = currentLang === 'ar' ? 'English' : 'عربي';
+        
+        // Update Static Text
+        const t = translations[currentLang];
+        document.getElementById('chat-header-text').innerText = t.chatHeader;
+        document.getElementById('chat-welcome-msg').innerText = t.chatWelcome;
+        
+        render();
+    }
+
+    function render() {
+        let html = '';
+        const t = translations[currentLang];
+        
+        menuData.forEach(s => {
+            const catName = currentLang === 'ar' ? s.cat_ar : s.cat_en;
+            html += `<div class="cat-box"><h2 class="cat-title">🔥 ${catName}</h2>`;
+            s.items.forEach(i => {
+                const itemName = currentLang === 'ar' ? i.n_ar : i.n_en;
+                const msg = encodeURIComponent(`${currentLang === 'ar' ? 'طلب جديد: ' : 'New Order: '} ${itemName}`);
+                const link = `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
+                const p2h = i.p2 ? `<div class="price"><span class="p-lbl">${t.french}</span><span>${i.p2} LE</span></div>` : '';
+                
+                html += `
+                <div class="item">
+                    <span>${itemName}</span>
+                    <div class="price-group">
+                        <a href="${link}" class="btn-ws">${t.order}</a>
+                        <div class="price"><span class="p-lbl">${i.p2 ? t.saj : t.price}</span><span>${i.p1} LE</span></div>
+                        ${p2h}
+                    </div>
+                </div>`;
+            });
+            html += `</div>`;
+        });
+        document.getElementById('menu-content').innerHTML = html;
+        renderChatOptions();
+    }
+
+    function renderChatOptions() {
+        const t = translations[currentLang];
+        document.getElementById('chat-options-btns').innerHTML = `
+            <button class="opt-btn" onclick="askBot('light')">${t.optLight}</button>
+            <button class="opt-btn" onclick="askBot('hungry')">${t.optHungry}</button>
+            <button class="opt-btn" onclick="askBot('budget')">${t.optBudget}</button>
+            <button class="opt-btn" onclick="toggleChat()">${t.optClose}</button>
+        `;
+    }
+
+    function toggleChat() {
+        const win = document.getElementById('chat-window');
+        win.style.display = win.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function askBot(type) {
+        const body = document.getElementById('chat-body');
+        let reply = "";
+        
+        if(currentLang === 'ar') {
+            if(type === 'light') reply = "أرشحلك سندوتش البطاطس السوري.. خفيف وسريع!";
+            else if(type === 'hungry') reply = "لو جعان بجد يبقى مفيش غير البروستد فرخة كاملة!";
+            else reply = "عايز توفير؟ الحواوشي بـ 30ج هو الحل!";
+        } else {
+            if(type === 'light') reply = "I recommend the Syrian Fries sandwich.. light and quick!";
+            else if(type === 'hungry') reply = "If you're really hungry, go for the Full Broasted Chicken!";
+            else reply = "On a budget? The 30 LE Hawawshi is the best choice!";
+        }
+
+        body.innerHTML += `<div class="chat-msg" style="background:var(--gold); color:#000; align-self:flex-end;">${type}</div>`;
+        body.innerHTML += `<div class="chat-msg"><b>VOODOO:</b> ${reply}</div>`;
+        body.scrollTop = body.scrollHeight;
+    }
+
+    render();
+</script>
+</body>
+</html>
